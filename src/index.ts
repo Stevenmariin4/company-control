@@ -4,10 +4,9 @@ import * as bodyParser from 'body-parser';
 import * as dotenv from 'dotenv';
 import * as express from 'express';
 import * as cors from 'cors';
-import * as https from 'https';
 import { databaseConnection } from './utils/database/database';
 import config from './config';
-import { FormatRouter } from './routes/format.router';
+import { dynamicRouter } from './routes/dynamic.router';
 /**
  * This class launch the service
  */
@@ -16,7 +15,7 @@ class Server {
   public app: express.Application;
   private env: any;
   private corsOptions: Object;
-  private fileRouter: FormatRouter;
+  private dynamicRoutes: dynamicRouter;
 
   constructor() {
     this.app = express();
@@ -24,7 +23,7 @@ class Server {
     // Configure Application
     this.config();
 
-    this.fileRouter = new FormatRouter();
+    this.dynamicRoutes = new dynamicRouter();
 
     // Cors Options
     this.corsOptions = {
@@ -52,7 +51,7 @@ class Server {
    *  Configure the routes of my app
    */
   routes(): void {
-    this.app.use(`${this.fileRouter.uri}`, this.fileRouter.router);
+    this.app.use(`${this.dynamicRoutes.uri}`, this.dynamicRoutes.router);
   }
 
   private normalizePort(port: any) {

@@ -88,7 +88,6 @@ export abstract class BaseService {
           });
           let resultFind;
           if (this.joins.length > 0) {
-            console.log('Search with relationship');
             resultFind = await tenant.find(query).populate('use_role');
           } else {
             resultFind = await tenant.find(query);
@@ -166,42 +165,31 @@ export abstract class BaseService {
   private formatterQuery(data) {
     return new Promise((resolve, reject) => {
       try {
-        let newFilter = {};
         const { filter, toSearch, attributes } = data;
-        if (toSearch) {
-          if (!attributes) {
-            const body = {
-              code: 400,
-              message: 'property attributes not found',
-            };
-            resolve(body);
-          } else {
-            attributes.forEach((element) => {
-              newFilter[`${element}`] = { $regex: '.*' + toSearch + '.*' };
-            });
-          }
-        } else {
-          if (!filter) {
-            const body = {
-              code: 400,
-              message: 'property filter not found',
-            };
-            resolve(body);
-          } else {
-            for (const [key, value] of Object.entries(filter)) {
-              if (typeof value == 'object') {
-                const nameProperty = Object.getOwnPropertyNames(value);
-                const operator = this.getOperatorFromString(nameProperty[0]);
-                const newObject = new Object();
-                newObject[`${operator}`] = value[`${nameProperty}`];
-                newFilter[`${key}`] = newObject;
-              } else {
-                newFilter[`${key}`] = value;
-              }
+        const newFilter = {};
+  
+        if (toSearch && attributes) {
+          // Si hay una cadena de búsqueda, aplicamos el filtro en los atributos especificados
+          const searchRegex = new RegExp(toSearch.fieldToSearch, 'i'); // Insensible a mayúsculas y minúsculas
+          const orConditions = attributes.map((element) => ({ [element]: searchRegex }));
+          newFilter['$or'] = orConditions;
+        } 
+        if (filter) {
+          for (const [key, value] of Object.entries(filter)) {
+            if (typeof value === 'object') {
+              const operator = this.getOperatorFromString(value['operator']);
+              newFilter[value['name']] = { [operator]: value['value'] };
+            } else {
+              newFilter[key] = value;
             }
           }
-        }
-        if (data.hasOwnProperty('pagination')) {
+        } else {
+          const body = {
+            code: 400,
+            message: 'Invalid input: missing filter or attributes',
+          };
+          resolve(body);
+          return;
         }
         resolve(newFilter);
       } catch (error) {
@@ -209,6 +197,7 @@ export abstract class BaseService {
       }
     });
   }
+  
 
   /**
    * Given an operator of type string, transform

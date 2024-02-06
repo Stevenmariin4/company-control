@@ -7,7 +7,7 @@ class DatabaseManagemente {
   private instance: Mongoose;
   private dbUri: string;
   constructor() {
-    this.dbUri = `mongodb+srv://${config.dbName}:${config.dbPassword}@cluster0.dsdixxi.mongodb.net/?retryWrites=true&w=majority    `;
+    this.dbUri = `mongodb+srv://${config.dbUserName}:${config.dbPassword}@cluster0.dsdixxi.mongodb.net/?retryWrites=true&w=majority    `;
   }
 
   /**
@@ -18,8 +18,6 @@ class DatabaseManagemente {
     return new Promise<any>(async (resolve, reject) => {
       try {
         const mongoOptions = {
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
           autoIndex: true,
           connectTimeoutMS: 10000,
           socketTimeoutMS: 30000,

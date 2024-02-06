@@ -19,6 +19,7 @@ const config = {
 
   dbHost: process.env.DB_HOST,
   dbPort: process.env.DB_PORT,
+  dbUserName: process.env.DB_USER_NAME,
   dbName: process.env.DB_NAME,
   dbPassword: process.env.DB_PASSWORD,
   dbIsCloud: process.env.DB_IS_ClOUD,
